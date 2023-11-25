@@ -29,10 +29,14 @@ const client = new MongoClient(uri, {
     try {
          // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
-    const campCollection = client.db("bistroDb").collection("allCamp");
+    const campCollection = client.db("medi-Camp-management").collection("allCamp");
     
     // camp 
-
+    app.get('/api/v1/camp',async(req, res)=>{
+        const result = await campCollection.find().toArray();
+        res.send(result)
+    })
+     
     app.post('/api/v1/add-a-camp', async(req, res)=>{
         const campData = req.body;
         const result = await campCollection.insertOne(campData);
