@@ -30,20 +30,32 @@ const client = new MongoClient(uri, {
          // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
     const campCollection = client.db("medi-Camp-management").collection("allCamp");
+    const campRegisterCollection = client.db("medi-Camp-management").collection("RegisteredCamp");
     
-    // camp 
+    // camp data
     app.get('/api/v1/camp',async(req, res)=>{
         const result = await campCollection.find().toArray();
         res.send(result)
     })
-     
+    app.get('/api/v1/camp-details/:id', async(req, res)=>{
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)}
+      const result = await campCollection.findOne(query);
+      res.send(result)
+    })
     app.post('/api/v1/add-a-camp', async(req, res)=>{
         const campData = req.body;
         const result = await campCollection.insertOne(campData);
         res.send(result);
     })
     
+    //camp register 
 
+    app.post('/api/v1/camp-register', async(req, res)=>{
+      const regData = req.body;
+      const result = await campRegisterCollection.insertOne(regData);
+      res.send(result)
+    })
 
 
      // Send a ping to confirm a successful connection
