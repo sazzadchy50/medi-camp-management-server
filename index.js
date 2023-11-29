@@ -31,11 +31,18 @@ const client = new MongoClient(uri, {
     await client.connect();
     const campCollection = client.db("medi-Camp-management").collection("allCamp");
     const campRegisterCollection = client.db("medi-Camp-management").collection("RegisteredCamp");
+    const usersCollection = client.db("medi-Camp-management").collection("users");
     
     // camp data
     app.get('/api/v1/camp',async(req, res)=>{
         const result = await campCollection.find().toArray();
         res.send(result)
+    })
+    app.get('/api/v1/update-camp/:id', async(req, res)=>{
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)};
+      const result = await campCollection.findOne(query);
+      res.send(result)
     })
     app.get('/api/v1/camp-details/:id', async(req, res)=>{
       const id = req.params.id;
@@ -50,13 +57,25 @@ const client = new MongoClient(uri, {
     })
     
     //camp register 
-
+    app.get('/api/v1/camp-register')
     app.post('/api/v1/camp-register', async(req, res)=>{
       const regData = req.body;
       const result = await campRegisterCollection.insertOne(regData);
       res.send(result)
     })
 
+    // user data
+    app.get('/api/v1/users', async(req, res)=>{
+      const result = await usersCollection.find().toArray()
+      res.send(result)
+      
+    })
+    app.post('/api/v1/users', async(req, res)=>{
+      const userData = req.body;
+    console.log(userData);
+      const result = await usersCollection.insertOne(userData);
+      res.send(result)
+    })
 
      // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
