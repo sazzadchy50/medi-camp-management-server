@@ -38,12 +38,8 @@ const client = new MongoClient(uri, {
         const result = await campCollection.find().toArray();
         res.send(result)
     })
-    app.get('/api/v1/update-camp/:id', async(req, res)=>{
-      const id = req.params.id;
-      const query = {_id: new ObjectId(id)};
-      const result = await campCollection.findOne(query);
-      res.send(result)
-    })
+    
+  
     app.get('/api/v1/camp-details/:id', async(req, res)=>{
       const id = req.params.id;
       const query = {_id: new ObjectId(id)}
@@ -63,7 +59,21 @@ const client = new MongoClient(uri, {
       const result = await campRegisterCollection.insertOne(regData);
       res.send(result)
     })
+    // update camp data
+    app.get('/api/v1/update-camp/:id', async(req, res)=>{
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)};
+      const result = await campCollection.findOne(query);
+      res.send(result)
+    })
 
+    //delete camp
+    app.delete('/api/v1/delete-camp/:id', async(req, res)=>{
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)};
+      const result = await campCollection.deleteOne(query);
+      res.send(result)
+    })
     // user data
     app.get('/api/v1/users', async(req, res)=>{
       const result = await usersCollection.find().toArray()
