@@ -21,23 +21,7 @@ app.use(
   })
 );
 
-//middlewares
-const verifyToken = (req, res, next) => {
-  console.log("verify token", req.headers.authorization);
-  if (!req.headers.authorization) {
-    return res.status(401).send({ message: "forbidden access" });
-  }
-  const token = req.headers.authorization.split(" ")[1];
-  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
-    if (err) {
-      console.log("error verifying token", err);
-      return res.status(401).send({ message: "forbidden access" });
-    }
-    req.decoded = decoded;
-    console.log("decoded:", decoded);
-    next();
-  });
-};   
+
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.wsx9xso.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
