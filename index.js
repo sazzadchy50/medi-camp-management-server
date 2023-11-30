@@ -22,6 +22,21 @@ app.use(
 );
 
 
+const verifyToken = (req, res, next) => {
+  const token = req.cookies.token;
+  if (!token) {
+    return res.status(401).send({ message: "unauthorized access first" });
+  }
+  accessToken.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(401).send({ message: "unauthorized access" });
+    }
+    req.user = decoded;
+    next();
+  });
+};
+
+
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.wsx9xso.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -36,7 +51,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    // await client.connect();
+    await client.connect();
     const campCollection = client
       .db("medi-Camp-management")
       .collection("allCamp");
@@ -70,7 +85,7 @@ async function run() {
     });
 
     //camp register
-    app.post("/api/v1/camp-register", async (req, res) => {
+    app.post("/api/v1/camp-register",verifyToken, async (req, res) => {
       const regData = req.body;
       const result = await campRegisterCollection.insertOne(regData);
       res.send(result);
@@ -81,12 +96,13 @@ async function run() {
       res.send(result);
     });
     // update camp data
-    app.get("/api/v1/dashboard/update-camp/:id", async (req, res) => {
+    app.get("/api/v1/dashboard/update-camp/:id", verifyToken, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await campCollection.findOne(query);
       res.send(result);
     });
+
     app.patch("api/v1/dashboard/update-camp/:campId", async (req, res) => {
       const data = req.body;
       const id = req.params.campId;
@@ -115,17 +131,14 @@ async function run() {
       const result = await campCollection.deleteOne(query);
       res.send(result);
     });
-    // user data
-    app.get("/api/v1/users", async (req, res) => {
-      const result = await usersCollection.find().toArray();
-      res.send(result);
-    });
+    // user data   
     app.post("/api/v1/users", async (req, res) => {
       const userData = req.body;
       console.log(userData);
       const result = await usersCollection.insertOne(userData);
       res.send(result);
     });
+
     // participant dashboard
     // feed back 
     app.post("/api/v1/feedback-and-ratings", async (req, res) => {
