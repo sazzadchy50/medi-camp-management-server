@@ -46,6 +46,9 @@ async function run() {
     const usersCollection = client
       .db("medi-Camp-management")
       .collection("users");
+    const ratingsCollection = client
+      .db("medi-Camp-management")
+      .collection("FeedBack-and-Ratings");
 
     // camp data
     app.get("/api/v1/camp", async (req, res) => {
@@ -123,14 +126,19 @@ async function run() {
       const result = await usersCollection.insertOne(userData);
       res.send(result);
     });
+    // participant dashboard
     // feed back 
     app.post("/api/v1/feedback-and-ratings", async (req, res) => {
       const ratings = req.body;
       console.log(ratings);
-      const result = await usersCollection.insertOne(ratings);
+      const result = await ratingsCollection.insertOne(ratings);
       res.send(result);
     });
-    
+    app.get("/api/v1/feedback-and-ratings", async (req, res) => {
+      const result = await ratingsCollection.find().toArray();
+      res.send(result);
+    });
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
