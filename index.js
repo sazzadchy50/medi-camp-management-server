@@ -123,7 +123,14 @@ async function run() {
       const result = await usersCollection.insertOne(userData);
       res.send(result);
     });
-
+    // feed back 
+    app.post("/api/v1/feedback-and-ratings", async (req, res) => {
+      const ratings = req.body;
+      console.log(ratings);
+      const result = await usersCollection.insertOne(ratings);
+      res.send(result);
+    });
+    
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
