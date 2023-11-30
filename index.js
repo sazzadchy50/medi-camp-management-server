@@ -10,7 +10,16 @@ const port = process.env.PORT || 5000;
 
 //middleware
 app.use(cors());
-app.use(express.json());
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "https://medi-camp-management.web.app/",
+      "https://medi-camp-management.firebaseapp.com/",
+    ],
+    credentials: true,
+  })
+);
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.wsx9xso.mongodb.net/?retryWrites=true&w=majority`;
 
@@ -62,11 +71,11 @@ async function run() {
       const result = await campRegisterCollection.insertOne(regData);
       res.send(result);
     });
-    //register camp management 
-    app.get('/api/v1/dashboard/manage-registered-camps', async(req, res)=>{
+    //register camp management
+    app.get("/api/v1/dashboard/manage-registered-camps", async (req, res) => {
       const result = await campRegisterCollection.find().toArray();
-      res.send(result)
-    })
+      res.send(result);
+    });
     // update camp data
     app.get("/api/v1/dashboard/update-camp/:id", async (req, res) => {
       const id = req.params.id;
@@ -92,7 +101,6 @@ async function run() {
           email: user.email,
         },
       };
-
       const result = await campCollection.updateOne(filter, updateDoc);
       res.send(result);
     });
