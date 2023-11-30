@@ -59,14 +59,36 @@ const client = new MongoClient(uri, {
       const result = await campRegisterCollection.insertOne(regData);
       res.send(result)
     })
+
     // update camp data
-    app.get('/api/v1/update-camp/:id', async(req, res)=>{
+    app.get('/api/v1/dashboard/update-camp/:id', async(req, res)=>{
       const id = req.params.id;
       const query = {_id: new ObjectId(id)};
       const result = await campCollection.findOne(query);
       res.send(result)
     })
+    app.patch('api/v1/dashboard/update-camp/:campId',async(req,res)=>{
+      const data = req.body;
+      const id = req.params.campId;
+      const filter = {_id: new ObjectId(id)}
+    const updateDoc = {
+      $set: {
+        name: data.name,
+        fees: data.Fees,
+        professionals: data.HealthcareProfessionals,
+        specializedServices: data.specializedServices,
+        venueLocation: data.venueLocation,
+        targetedAudience: data.targetedAudience,
+        description: data.Description,
+        dateTime: data.scheduleDate,
+        image: item.image,
+        email: user.email
+      }
+    }
 
+      const result = await campCollection.updateOne(filter, updateDoc);
+      res.send(result)
+    })
     //delete camp
     app.delete('/api/v1/delete-camp/:id', async(req, res)=>{
       const id = req.params.id;
@@ -80,6 +102,12 @@ const client = new MongoClient(uri, {
       res.send(result)
       
     })
+    app.get('/api/v1/users', async(req, res)=>{
+      const result = await usersCollection.find().toArray()
+      res.send(result)
+      
+    })
+    
     app.post('/api/v1/users', async(req, res)=>{
       const userData = req.body;
     console.log(userData);
@@ -97,6 +125,7 @@ const client = new MongoClient(uri, {
     // await client.close();
   }
   }
+  
 
   run().catch(console.dir);
 
