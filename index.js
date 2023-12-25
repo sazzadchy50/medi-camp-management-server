@@ -8,7 +8,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
 const port = process.env.PORT || 5000;
 //middleware
-app.use(express.json())
+app.use(express.json());
 app.use(
   cors({
     origin: [
@@ -47,6 +47,12 @@ async function run() {
     const ratingsCollection = client
       .db("medi-Camp-management")
       .collection("FeedBack-and-Ratings");
+    const upComingCampCollection = client
+      .db("medi-Camp-management")
+      .collection("upComingCamp");
+    const requestCampCollection = client
+      .db("medi-Camp-management")
+      .collection("requestCamp");
 
     // camp data
     app.get("/api/v1/camp", async (req, res) => {
@@ -78,6 +84,7 @@ async function run() {
       const result = await campRegisterCollection.find().toArray();
       res.send(result);
     });
+
     // update camp data
     app.get("/api/v1/dashboard/update-camp/:id", async (req, res) => {
       const id = req.params.id;
@@ -86,7 +93,7 @@ async function run() {
       res.send(result);
     });
 
-    app.patch("api/v1/dashboard/update-camp/:id", async (req, res) => {
+    app.patch("/api/v1/dashboard/update-camp/:id", async (req, res) => {
       const data = req.body;
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
@@ -109,9 +116,9 @@ async function run() {
       res.send(result);
     });
 
-    app.patch("api/v1/dashboard/update-camp", async (req, res) => {
+    app.patch("/api/v1/dashboard/update-camp", async (req, res) => {
       const data = req.body;
-  
+
       const existingCamp = await campCollection.findOne(filter);
       const updateDoc = {
         $set: {
@@ -124,13 +131,13 @@ async function run() {
           description: data.Description,
           dateTime: data.scheduleDate,
           image: existingCamp ? existingCamp.image : data.image,
-          email: user.email,
+          email: data.email,
         },
       };
-      const result = await campCollection.updateOne( updateDoc);
+      const result = await campCollection.updateOne(updateDoc);
       res.send(result);
     });
-    
+
     //delete camp
     app.delete("/api/v1/delete-camp/:id", async (req, res) => {
       const id = req.params.id;
@@ -166,7 +173,7 @@ async function run() {
       const email = req.params?.email;
       const query = { email: email };
       const user = await usersCollection.findOne(query);
-      console.log("user organizer", user);
+
       let organizer = false;
       if (user) {
         organizer = user?.role === "organizer";
@@ -178,7 +185,7 @@ async function run() {
       const email = req.params?.email;
       const query = { email: email };
       const user = await usersCollection.findOne(query);
-      console.log("user participant", user);
+
       let participant = false;
       if (user) {
         participant = user?.role === "participant";
@@ -190,7 +197,7 @@ async function run() {
       const email = req.params?.email;
       const query = { email: email };
       const user = await usersCollection.findOne(query);
-      console.log("user healthProfessional", user);
+
       let healthProfessional = false;
       if (user) {
         healthProfessional = user?.role === "healthProfessional";
@@ -208,9 +215,8 @@ async function run() {
     // });
 
     app.post("/api/v1/users", async (req, res) => {
-    
       const user = req.body;
-      console.log('logged user data', user);
+
       if (!user || !user.email) {
         return res
           .status(400)
@@ -225,15 +231,27 @@ async function run() {
       res.send(result);
     });
 
-  //  app.get('/api/v1/users', async(req, res)=>{
-  //    const result = await usersCollection.find().toArray();
-  //    res.send(result)
-  //  })
+    //upComing  camp
+    app.post("/api/v1/add-upComing-Camp", async (req, res) => {
+      try {
+        const campData = req.body;
+        const result = await upComingCampCollection.insertOne(campData);
+        res.send(result);
+      } catch (error) {
+        console.error("Error in add-upComing-Camp route:", error);
+        res.status(500).send({ error: "Internal Server Error" });
+      }
+    });
+
+    //  app.get('/api/v1/users', async(req, res)=>{
+    //    const result = await usersCollection.find().toArray();
+    //    res.send(result)
+    //  })
 
     // participant dashboard
     // feed back
-    app.post("/api/v1/dashboard/add-rating", async (req, res) => {     
-      
+
+    app.post("/api/v1/dashboard/add-rating", async (req, res) => {
       const ratings = req.body;
       console.log(ratings);
       const result = await ratingsCollection.insertOne(ratings);
@@ -245,7 +263,14 @@ async function run() {
       res.send(result);
     });
 
-   
+    //  Requested Camp
+    app.post("/api/v1/request-camp", async (req, res) => {
+      const reqCampData = req.body;
+      console.log('req camp',reqCampData);
+      const result = await requestCampCollection.insertOne(reqCampData);
+      console.log(result);
+      res.send(result);
+    });
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
